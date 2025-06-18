@@ -1,12 +1,56 @@
-# React + Vite
+# 📊 Excel Analytics Platform
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A full-stack MERN application that allows users to upload Excel files, dynamically map data to chart axes, generate 2D/3D charts, and download results as images or PDFs. The platform includes user/admin authentication, dashboard history, and optional AI-based insights.
 
-Currently, two official plugins are available:
+---
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## 🚀 Features
 
-## Expanding the ESLint configuration
+- 🔐 **User & Admin Authentication** (JWT-based)
+- 📁 **Excel Upload & Parsing** using `SheetJS`
+- 📈 **Dynamic Data Mapping** (X and Y axes selection)
+- 📊 **Chart Generation**:
+  - Bar, Line, Pie, Scatter (Chart.js)
+  - 3D Column Charts (Three.js)
+- 📥 **Downloadable Charts** (PNG, PDF)
+- 🧠 **AI Tools API Integration** *(Optional)* for smart data summaries
+- 🗂️ **Dashboard** with upload history
+- 🌐 **Responsive UI**
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+---
+
+## 🛠 Tech Stack
+
+### Frontend
+- React.js
+- Redux Toolkit
+- Tailwind CSS
+- Chart.js
+- Three.js
+
+### Backend
+- Node.js
+- Express.js
+- MongoDB
+- Multer (File Upload)
+- SheetJS (`xlsx` for Excel parsing)
+
+### Optional
+- OpenAI or similar API for insights
+- Cloudinary (if image storage is required)
+
+---
+
+## 📅 Development Timeline (5 Weeks)
+
+| Week | Milestone |
+|------|-----------|
+| 1 | Project setup, user/admin authentication, dashboard layout |
+| 2 | File upload setup, Excel parsing logic, storing data in MongoDB |
+| 3 | Chart rendering with Chart.js & Three.js, dynamic axis selection |
+| 4 | Save analysis history, enable download, integrate AI API |
+| 5 | Admin panel, testing, deployment (Netlify/Render) |
+
+---
+
+
