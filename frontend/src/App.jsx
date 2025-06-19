@@ -1,4 +1,4 @@
-import Welcome from "./components/Welcome"
+// import Welcome from "./components/Welcome"
 import MainRoutes from "./routes/MainRoutes"
 import Navbar from './components/Navbar';
 const App = () => {

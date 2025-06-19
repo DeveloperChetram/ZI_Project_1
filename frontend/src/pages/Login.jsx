@@ -31,7 +31,7 @@ const Login = () => {
           </div>
           <button
             type="submit"
-            className="w-full bg-[#02b576] text-white py-2 rounded-md shadow hover:shadow-[0_0_15px_#02b576] transition-all"
+            className="cursor-pointer w-full bg-[#02b576] text-white py-2 rounded-md shadow hover:shadow-[0_0_15px_#02b576] transition-all"
           >
             Login
           </button>
