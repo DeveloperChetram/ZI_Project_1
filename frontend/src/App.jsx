@@ -1,10 +1,13 @@
 import Welcome from "./components/Welcome"
+import MainRoutes from "./routes/MainRoutes"
+import Navbar from './components/Navbar';
 const App = () => {
   return (
-    <div className="min-h-screen bg-gray-900 flex items-center justify-center">
+    <div className="min-h-screen bg-black flex flex-col items-center w-full">
+      <Navbar/>
+        <MainRoutes />
+      
 
-        <Welcome />
-     
     </div>
   )
 }
