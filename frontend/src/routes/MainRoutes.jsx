@@ -9,7 +9,7 @@ import AdminDashboard from '../components/AdminDashboard'
 const MainRoutes = () => {
   return (
     <Routes>
-     <Route path='/home' element={<Home/>}  />
+     <Route path='/' element={<Home/>}  />
      <Route path='/login' element={<Login/>}  />
      <Route path='/sign-up' element={<Register/>}  />
      <Route path='/admin-dashboard' element={<AdminDashboard/>}  />
