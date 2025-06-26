@@ -1,6 +1,6 @@
 const fs = require('fs');
 const xlsx = require('xlsx');
-const Upload = require('../models/Upload'); // MongoDB model
+const Upload = require('../models/Upload').default; // MongoDB model
 
 // Parse Excel file and return JSON
 const parseExcel = (filePath) => {
