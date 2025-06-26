@@ -1,12 +1,19 @@
 import {Link} from "react-router-dom"
 import {useForm} from "react-hook-form"
+import {useSelector, useDispatch } from "react-redux";
+import { asyncRegisterUser } from "../redux/actions/userAction";
+
 const Registration = () => {
     const {register, reset, handleSubmit } = useForm()
-    
+    const dispatch = useDispatch()
+    const userData = useSelector((state)=>state.userSlice.data)
     const registerHandler = (data)=>{
-        console.log(data)
+        console.log(userData)
+        dispatch(asyncRegisterUser(data))
+        
         reset()
     }
+    // console.log()
   return (
     <section className="min-h-screen w-full flex items-center justify-center bg-black px-4">
       <div className=" p-8 rounded-lg max-w-md w-full  transition-all">

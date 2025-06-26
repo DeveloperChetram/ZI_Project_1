@@ -1,9 +1,9 @@
-const mongoose = require('mongoose');
+import { Schema, model } from 'mongoose';
 
-const uploadSchema = new mongoose.Schema({
+const uploadSchema = new Schema({
   filename: String,
   data: Array,
   uploadedAt: Date
 });
 
-module.exports = mongoose.model('Upload', uploadSchema);
+export default model('Upload', uploadSchema);
