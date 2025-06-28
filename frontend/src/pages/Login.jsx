@@ -1,10 +1,14 @@
 import { useForm } from 'react-hook-form';
 import {Link} from 'react-router-dom'
+import { asyncLoginUser } from '../redux/actions/userAction';
+import { useDispatch } from 'react-redux';
 const Login = () => {
     const {register, handleSubmit, reset} = useForm()
+    const dispatch = useDispatch()
     const loginHandler = (data)=>{
+    dispatch(asyncLoginUser(data))
         console.log(data)
-        reset()
+        // reset()
     }
   return (
     <section className="min-h-screen w-full flex items-center justify-center bg-black px-4">
