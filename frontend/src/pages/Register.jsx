@@ -2,6 +2,7 @@ import {Link} from "react-router-dom"
 import {useForm} from "react-hook-form"
 import {useSelector, useDispatch } from "react-redux";
 import { asyncRegisterUser } from "../redux/actions/userAction";
+import { toast } from "react-toastify";
 
 const Registration = () => {
     const {register, reset, handleSubmit } = useForm()
@@ -10,7 +11,7 @@ const Registration = () => {
     const registerHandler = (data)=>{
         console.log(userData)
         dispatch(asyncRegisterUser(data))
-        
+   
         reset()
     }
     // console.log()

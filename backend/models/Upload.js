@@ -1,4 +1,4 @@
-import { Schema, model } from 'mongoose';
+const { Schema, model } = require('mongoose');
 
 const uploadSchema = new Schema({
   filename: String,
@@ -6,4 +6,4 @@ const uploadSchema = new Schema({
   uploadedAt: Date
 });
 
-export default model('Upload', uploadSchema);
+module.exports = model('Upload', uploadSchema);
