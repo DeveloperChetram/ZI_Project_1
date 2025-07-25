@@ -1,8 +1,6 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import * as api from '../api/api';
 
-
-
 export const uploadExcelFile = createAsyncThunk('file/uploadFile', async (file, { rejectWithValue }) => {
   try {
     const formData = new FormData();
@@ -22,7 +20,6 @@ export const fetchHistory = createAsyncThunk('file/fetchHistory', async (_, { re
     return rejectWithValue(error.response.data);
   }
 });
-
 
 const fileSlice = createSlice({
   name: 'file',

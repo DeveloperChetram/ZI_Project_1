@@ -7,7 +7,6 @@ const ChartCard = ({ title, chartType, chartData, chartOptions }) => {
   const chartRef = useRef(null);
 
   const downloadAsPNG = () => {
-    // We pass the backgroundColor to prevent a transparent background on download
     if (chartRef.current) {
       html2canvas(chartRef.current, { backgroundColor: '#111' }).then((canvas) => {
         const link = document.createElement('a');
@@ -33,14 +32,18 @@ const ChartCard = ({ title, chartType, chartData, chartOptions }) => {
   };
 
   const renderChart = () => {
+    // Adding a unique key forces the component to remount when data changes,
+    // which fixes the blank chart rendering issue.
+    const chartKey = `${chartType}-${JSON.stringify(chartData)}`;
+
     switch (chartType) {
-      case 'bar': return <Bar data={chartData} options={chartOptions} />;
-      case 'line': return <Line data={chartData} options={chartOptions} />;
-      case 'pie': return <Pie data={chartData} options={chartOptions} />;
-      case 'doughnut': return <Doughnut data={chartData} options={chartOptions} />;
-      case 'polarArea': return <PolarArea data={chartData} options={chartOptions} />;
-      case 'radar': return <Radar data={chartData} options={chartOptions} />;
-      case 'scatter': return <Scatter data={chartData} options={chartOptions} />;
+      case 'bar': return <Bar key={chartKey} data={chartData} options={chartOptions} />;
+      case 'line': return <Line key={chartKey} data={chartData} options={chartOptions} />;
+      case 'pie': return <Pie key={chartKey} data={chartData} options={chartOptions} />;
+      case 'doughnut': return <Doughnut key={chartKey} data={chartData} options={chartOptions} />;
+      case 'polarArea': return <PolarArea key={chartKey} data={chartData} options={chartOptions} />;
+      case 'radar': return <Radar key={chartKey} data={chartData} options={chartOptions} />;
+      case 'scatter': return <Scatter key={chartKey} data={chartData} options={chartOptions} />;
       default: return <p>Invalid chart type</p>;
     }
   };
@@ -60,7 +63,6 @@ const ChartCard = ({ title, chartType, chartData, chartOptions }) => {
         </div>
       </div>
       
-      {/* This is the changed line: */}
       <div className="relative h-64 w-full" ref={chartRef}>
         {renderChart()}
       </div>

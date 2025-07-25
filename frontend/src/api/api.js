@@ -26,12 +26,17 @@ export const uploadFile = (formData) => api.post('/file/upload', formData, {
 });
 export const getHistory = () => api.get('/file/history');
 
-// Chart endpoints
-export const getChartData = () => api.get('/chart/data');
-
 // Admin endpoints
 export const getAdminStats = () => api.get('/admin/stats');
 export const getAllUsers = () => api.get('/admin/users');
+export const addUser = (userData) => api.post('/admin/users', userData);
+export const toggleBlockUser = (id) => api.patch(`/admin/users/${id}/toggle-block`);
 export const deleteUserById = (id) => api.delete(`/admin/users/${id}`);
+export const getAllUploads = () => api.get('/admin/uploads');
+
+// User Profile endpoints
+export const getUserProfile = () => api.get('/users/profile');
+export const updateUserProfile = (userData) => api.put('/users/profile', userData);
+export const changePassword = (passwordData) => api.put('/users/change-password', passwordData);
 
 export default api;

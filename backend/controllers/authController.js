@@ -8,9 +8,8 @@ const generateToken = (userId) => {
 
 const signup = async (req, res) => {
   try {
-    const { username, email, password, role } = req.body; // Add role
+    const { username, email, password, role } = req.body;
 
-    // Check if user already exists
     const existingUser = await User.findOne({ 
       $or: [{ email }, { username }] 
     });
@@ -21,17 +20,14 @@ const signup = async (req, res) => {
       });
     }
 
-    // Create new user
     const user = new User({
       username,
       email,
       password,
-      role: role || 'user' // Default to 'user' if not provided
+      role: role || 'user'
     });
 
     await user.save();
-
-    // Generate token
     const token = generateToken(user._id);
 
     res.status(201).json({
@@ -55,19 +51,18 @@ const login = async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    // Find user by email
     const user = await User.findOne({ email });
     if (!user) {
-      return res.status(401).json({ error: 'Invalid credentials' });
+      // Provide a specific error message
+      return res.status(401).json({ error: 'No user found with this email' });
     }
 
-    // Check password
     const isPasswordValid = await user.comparePassword(password);
     if (!isPasswordValid) {
-      return res.status(401).json({ error: 'Invalid credentials' });
+      // Provide a specific error message
+      return res.status(401).json({ error: 'Incorrect password' });
     }
 
-    // Generate token
     const token = generateToken(user._id);
 
     res.json({
