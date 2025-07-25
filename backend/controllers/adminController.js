@@ -67,3 +67,31 @@ exports.getAllUploads = async (req, res) => {
     res.status(500).json({ error: 'Failed to fetch uploads' });
   }
 };
+
+// Reset a user's password
+exports.resetUserPassword = async (req, res) => {
+  try {
+    const { password } = req.body;
+    if (!password) {
+      return res.status(400).json({ error: 'Password is required' });
+    }
+    const user = await User.findById(req.params.id);
+    if (!user) return res.status(404).json({ error: 'User not found' });
+
+    user.password = password; // The pre-save hook in the User model will hash it
+    await user.save();
+    res.status(200).json({ message: "User's password has been reset" });
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to reset password' });
+  }
+};
+
+// Get all uploads from a specific user
+exports.getUserUploads = async (req, res) => {
+  try {
+    const uploads = await Upload.find({ user: req.params.id }).populate('user', 'username email').sort({ uploadedAt: -1 });
+    res.status(200).json(uploads);
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to fetch user uploads' });
+  }
+};

@@ -6,7 +6,9 @@ const {
   addUser,
   toggleBlockUser,
   deleteUser,
-  getAllUploads 
+  getAllUploads,
+  resetUserPassword,
+  getUserUploads
 } = require('../controllers/adminController');
 const { adminAuth } = require('../middleware/auth');
 
@@ -18,6 +20,9 @@ router.get('/users', getUsers);
 router.post('/users', addUser);
 router.patch('/users/:id/toggle-block', toggleBlockUser);
 router.delete('/users/:id', deleteUser);
+router.post('/users/:id/reset-password', resetUserPassword);
+router.get('/users/:id/uploads', getUserUploads);
 router.get('/uploads', getAllUploads);
+
 
 module.exports = router;

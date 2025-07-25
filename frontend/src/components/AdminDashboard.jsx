@@ -1,30 +1,53 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'react-toastify';
-import { FiUsers, FiUpload, FiPlus, FiTrash2, FiLock, FiUnlock } from 'react-icons/fi';
-import { getAllUsers, addUser, toggleBlockUser, deleteUserById, getAllUploads } from '../api/api';
+import { FiUsers, FiUpload, FiPlus, FiTrash2, FiLock, FiUnlock, FiMoreVertical, FiEye } from 'react-icons/fi';
+import { getAllUsers, addUser, toggleBlockUser, deleteUserById, getAllUploads, resetUserPassword, getUserUploads } from '../api/api';
 
 const AdminDashboard = () => {
-  const [view, setView] = useState('users'); // 'users' or 'history'
+  const [view, setView] = useState('users');
   const [users, setUsers] = useState([]);
   const [uploads, setUploads] = useState([]);
   const [showAddUserForm, setShowAddUserForm] = useState(false);
+  const [activeUserMenu, setActiveUserMenu] = useState(null);
+  const [resetPasswordModal, setResetPasswordModal] = useState(null);
+  const [viewHistoryModal, setViewHistoryModal] = useState(null);
+  const [userHistory, setUserHistory] = useState([]);
+  const menuRef = useRef(null);
+
   const { register, handleSubmit, reset } = useForm();
+  const { register: registerPassword, handleSubmit: handlePasswordSubmit, reset: resetPassword } = useForm();
 
   const fetchData = async () => {
     try {
       const usersRes = await getAllUsers();
       setUsers(usersRes.data);
-      const uploadsRes = await getAllUploads();
-      setUploads(uploadsRes.data);
+      if (view === 'history') {
+        const uploadsRes = await getAllUploads();
+        setUploads(uploadsRes.data);
+      }
     } catch (error) {
       toast.error('Failed to fetch admin data.');
     }
   };
+  
+  // Close menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (menuRef.current && !menuRef.current.contains(event.target)) {
+        setActiveUserMenu(null);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
 
   useEffect(() => {
     fetchData();
-  }, []);
+  }, [view]);
 
   const handleAddUser = async (data) => {
     try {
@@ -32,7 +55,7 @@ const AdminDashboard = () => {
       toast.success('User added successfully!');
       reset();
       setShowAddUserForm(false);
-      fetchData(); // Refresh data
+      fetchData();
     } catch (error) {
       toast.error(error.response?.data?.error || 'Failed to add user.');
     }
@@ -42,7 +65,7 @@ const AdminDashboard = () => {
     try {
       const res = await toggleBlockUser(id);
       toast.success(res.data.message);
-      fetchData(); // Refresh data
+      await fetchData(); // Refresh data to show updated status
     } catch (error) {
       toast.error('Failed to update user.');
     }
@@ -53,10 +76,31 @@ const AdminDashboard = () => {
       try {
         await deleteUserById(id);
         toast.success('User deleted successfully.');
-        fetchData(); // Refresh data
+        fetchData();
       } catch (error) {
         toast.error('Failed to delete user.');
       }
+    }
+  };
+
+  const handleResetPassword = async (data) => {
+    try {
+      await resetUserPassword(resetPasswordModal._id, data.newPassword);
+      toast.success("Password reset successfully!");
+      setResetPasswordModal(null);
+      resetPassword();
+    } catch (error) {
+      toast.error("Failed to reset password.");
+    }
+  };
+
+  const handleViewHistory = async (user) => {
+    try {
+      const res = await getUserUploads(user._id);
+      setUserHistory(res.data);
+      setViewHistoryModal(user);
+    } catch (error) {
+      toast.error("Failed to fetch user's history.");
     }
   };
 
@@ -109,11 +153,18 @@ const AdminDashboard = () => {
                     <td className="p-2">{user.email}</td>
                     <td className="p-2">{user.role}</td>
                     <td className={`p-2 ${user.isBlocked ? 'text-red-500' : 'text-green-500'}`}>{user.isBlocked ? 'Blocked' : 'Active'}</td>
-                    <td className="p-2 flex space-x-2">
-                      <button onClick={() => handleToggleBlock(user._id)} title={user.isBlocked ? 'Unblock' : 'Block'}>
-                        {user.isBlocked ? <FiUnlock className="text-yellow-500" /> : <FiLock className="text-yellow-500" />}
+                    <td className="p-2 relative" ref={menuRef}>
+                      <button onClick={() => setActiveUserMenu(activeUserMenu === user._id ? null : user._id)}>
+                        <FiMoreVertical />
                       </button>
-                      <button onClick={() => handleDeleteUser(user._id)} title="Delete"><FiTrash2 className="text-red-500" /></button>
+                      {activeUserMenu === user._id && (
+                        <div className="absolute right-0 mt-2 w-48 bg-gray-900 border border-gray-700 rounded-md shadow-lg z-10">
+                          <a href="#!" onClick={() => handleToggleBlock(user._id)} className="block px-4 py-2 text-sm text-white hover:bg-gray-800">{user.isBlocked ? <><FiUnlock className="inline mr-2" />Unblock</> : <><FiLock className="inline mr-2" />Block</>}</a>
+                          <a href="#!" onClick={() => { setResetPasswordModal(user); setActiveUserMenu(null); }} className="block px-4 py-2 text-sm text-white hover:bg-gray-800">Reset Password</a>
+                          <a href="#!" onClick={() => handleViewHistory(user)} className="block px-4 py-2 text-sm text-white hover:bg-gray-800"><FiEye className="inline mr-2" />View History</a>
+                          <a href="#!" onClick={() => handleDeleteUser(user._id)} className="block px-4 py-2 text-sm text-red-500 hover:bg-gray-800"><FiTrash2 className="inline mr-2" />Delete</a>
+                        </div>
+                      )}
                     </td>
                   </tr>
                 ))}
@@ -143,6 +194,56 @@ const AdminDashboard = () => {
               ))}
             </tbody>
           </table>
+        </div>
+      )}
+
+      {/* Reset Password Modal */}
+      {resetPasswordModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-20">
+          <div className="bg-[#111] p-6 rounded-lg shadow-lg w-full max-w-md">
+            <h3 className="text-xl font-semibold mb-4">Reset Password for {resetPasswordModal.username}</h3>
+            <form onSubmit={handlePasswordSubmit(handleResetPassword)}>
+              <input {...registerPassword('newPassword')} type="password" placeholder="Enter new password" className="w-full p-2 bg-black border border-gray-700 rounded" />
+              <div className="flex justify-end space-x-4 mt-4">
+                <button type="button" onClick={() => setResetPasswordModal(null)} className="bg-gray-600 hover:bg-gray-700 py-2 px-4 rounded">Cancel</button>
+                <button type="submit" className="bg-blue-600 hover:bg-blue-700 py-2 px-4 rounded">Reset</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* View History Modal */}
+      {viewHistoryModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-20">
+          <div className="bg-[#111] p-6 rounded-lg shadow-lg w-full max-w-2xl">
+            <h3 className="text-xl font-semibold mb-4">Upload History for {viewHistoryModal.username}</h3>
+            <div className="overflow-y-auto max-h-96">
+              <table className="w-full text-left">
+                <thead>
+                  <tr className="border-b border-gray-700">
+                    <th className="p-2">Filename</th>
+                    <th className="p-2">Upload Date</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {userHistory.length > 0 ? userHistory.map(upload => (
+                    <tr key={upload._id} className="border-b border-gray-800">
+                      <td className="p-2">{upload.filename}</td>
+                      <td className="p-2">{new Date(upload.uploadedAt).toLocaleString()}</td>
+                    </tr>
+                  )) : (
+                    <tr>
+                      <td colSpan="2" className="text-center p-4">No uploads found for this user.</td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+            <div className="flex justify-end mt-4">
+              <button onClick={() => setViewHistoryModal(null)} className="bg-gray-600 hover:bg-gray-700 py-2 px-4 rounded">Close</button>
+            </div>
+          </div>
         </div>
       )}
     </div>
