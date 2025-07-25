@@ -26,7 +26,13 @@ exports.getUsers = async (req, res) => {
 exports.addUser = async (req, res) => {
   try {
     const { username, email, password, role } = req.body;
-    const newUser = new User({ username, email, password, role });
+    const newUser = new User({ 
+        username, 
+        email, 
+        password, 
+        role,
+        isBlocked: false // Ensure isBlocked is set by default
+    });
     await newUser.save();
     res.status(201).json({ message: 'User created successfully' });
   } catch (error) {

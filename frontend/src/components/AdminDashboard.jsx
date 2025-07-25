@@ -16,7 +16,7 @@ const AdminDashboard = () => {
   const menuRef = useRef(null);
 
   const { register, handleSubmit, reset } = useForm();
-  const { register: registerPassword, handleSubmit: handlePasswordSubmit, reset: resetPassword } = useForm();
+  const { register: registerPassword, handleSubmit: handlePasswordSubmit, reset: resetPasswordForm } = useForm();
 
   const fetchData = async () => {
     try {
@@ -30,8 +30,8 @@ const AdminDashboard = () => {
       toast.error('Failed to fetch admin data.');
     }
   };
-  
-  // Close menu when clicking outside
+
+  // Effect to close the dropdown menu when clicking outside
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (menuRef.current && !menuRef.current.contains(event.target)) {
@@ -44,7 +44,6 @@ const AdminDashboard = () => {
     };
   }, []);
 
-
   useEffect(() => {
     fetchData();
   }, [view]);
@@ -55,7 +54,7 @@ const AdminDashboard = () => {
       toast.success('User added successfully!');
       reset();
       setShowAddUserForm(false);
-      fetchData();
+      await fetchData();
     } catch (error) {
       toast.error(error.response?.data?.error || 'Failed to add user.');
     }
@@ -65,18 +64,18 @@ const AdminDashboard = () => {
     try {
       const res = await toggleBlockUser(id);
       toast.success(res.data.message);
-      await fetchData(); // Refresh data to show updated status
+      await fetchData();
     } catch (error) {
       toast.error('Failed to update user.');
     }
   };
 
   const handleDeleteUser = async (id) => {
-    if (window.confirm('Are you sure you want to delete this user and all their data?')) {
+    if (window.confirm('Are you sure you want to delete this user and all their data? This action cannot be undone.')) {
       try {
         await deleteUserById(id);
         toast.success('User deleted successfully.');
-        fetchData();
+        await fetchData();
       } catch (error) {
         toast.error('Failed to delete user.');
       }
@@ -84,11 +83,15 @@ const AdminDashboard = () => {
   };
 
   const handleResetPassword = async (data) => {
+    if (!data.newPassword) {
+        toast.error("Password cannot be empty.");
+        return;
+    }
     try {
       await resetUserPassword(resetPasswordModal._id, data.newPassword);
       toast.success("Password reset successfully!");
       setResetPasswordModal(null);
-      resetPassword();
+      resetPasswordForm();
     } catch (error) {
       toast.error("Failed to reset password.");
     }
@@ -123,10 +126,10 @@ const AdminDashboard = () => {
           </button>
 
           {showAddUserForm && (
-            <form onSubmit={handleSubmit(handleAddUser)} className="bg-[#111] p-6 rounded-lg shadow-lg mb-6 grid grid-cols-1 md:grid-cols-2 gap-4">
-              <input {...register('username')} placeholder="Username" className="p-2 bg-black border border-gray-700 rounded" />
-              <input {...register('email')} type="email" placeholder="Email" className="p-2 bg-black border border-gray-700 rounded" />
-              <input {...register('password')} type="password" placeholder="Password" className="p-2 bg-black border border-gray-700 rounded" />
+             <form onSubmit={handleSubmit(handleAddUser)} className="bg-[#111] p-6 rounded-lg shadow-lg mb-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+              <input {...register('username', { required: true })} placeholder="Username" className="p-2 bg-black border border-gray-700 rounded" />
+              <input {...register('email', { required: true })} type="email" placeholder="Email" className="p-2 bg-black border border-gray-700 rounded" />
+              <input {...register('password', { required: true })} type="password" placeholder="Password" className="p-2 bg-black border border-gray-700 rounded" />
               <select {...register('role')} className="p-2 bg-black border border-gray-700 rounded">
                 <option value="user">User</option>
                 <option value="admin">Admin</option>
@@ -135,7 +138,9 @@ const AdminDashboard = () => {
             </form>
           )}
 
-          <div className="bg-[#111] p-4 rounded-lg shadow-lg overflow-x-auto">
+ <div className="bg-[#111] p-4 rounded-lg shadow-lg overflow-x-auto min-h-[50vh]">
+
+
             <table className="w-full text-left">
               <thead>
                 <tr className="border-b border-gray-700">
@@ -143,7 +148,7 @@ const AdminDashboard = () => {
                   <th className="p-2">Email</th>
                   <th className="p-2">Role</th>
                   <th className="p-2">Status</th>
-                  <th className="p-2">Actions</th>
+                  <th className="p-2 text-right">Actions</th>
                 </tr>
               </thead>
               <tbody>
@@ -151,20 +156,22 @@ const AdminDashboard = () => {
                   <tr key={user._id} className="border-b border-gray-800">
                     <td className="p-2">{user.username}</td>
                     <td className="p-2">{user.email}</td>
-                    <td className="p-2">{user.role}</td>
-                    <td className={`p-2 ${user.isBlocked ? 'text-red-500' : 'text-green-500'}`}>{user.isBlocked ? 'Blocked' : 'Active'}</td>
-                    <td className="p-2 relative" ref={menuRef}>
-                      <button onClick={() => setActiveUserMenu(activeUserMenu === user._id ? null : user._id)}>
-                        <FiMoreVertical />
-                      </button>
-                      {activeUserMenu === user._id && (
-                        <div className="absolute right-0 mt-2 w-48 bg-gray-900 border border-gray-700 rounded-md shadow-lg z-10">
-                          <a href="#!" onClick={() => handleToggleBlock(user._id)} className="block px-4 py-2 text-sm text-white hover:bg-gray-800">{user.isBlocked ? <><FiUnlock className="inline mr-2" />Unblock</> : <><FiLock className="inline mr-2" />Block</>}</a>
-                          <a href="#!" onClick={() => { setResetPasswordModal(user); setActiveUserMenu(null); }} className="block px-4 py-2 text-sm text-white hover:bg-gray-800">Reset Password</a>
-                          <a href="#!" onClick={() => handleViewHistory(user)} className="block px-4 py-2 text-sm text-white hover:bg-gray-800"><FiEye className="inline mr-2" />View History</a>
-                          <a href="#!" onClick={() => handleDeleteUser(user._id)} className="block px-4 py-2 text-sm text-red-500 hover:bg-gray-800"><FiTrash2 className="inline mr-2" />Delete</a>
-                        </div>
-                      )}
+                    <td className="p-2 capitalize">{user.role}</td>
+                    <td className={`p-2 font-semibold ${user.isBlocked ? 'text-red-500' : 'text-green-500'}`}>{user.isBlocked ? 'Blocked' : 'Active'}</td>
+                    <td className="p-2 text-right">
+                      <div className="relative inline-block" ref={activeUserMenu === user._id ? menuRef : null}>
+                        <button onClick={() => setActiveUserMenu(activeUserMenu === user._id ? null : user._id)}>
+                          <FiMoreVertical />
+                        </button>
+                        {activeUserMenu === user._id && (
+                          <div className="absolute right-0 mt-2 w-48 bg-gray-900 border border-gray-700 rounded-md shadow-lg z-10 text-left">
+                            <button onClick={() => handleToggleBlock(user._id)} className="w-full text-left block px-4 py-2 text-sm text-white hover:bg-gray-800">{user.isBlocked ? <><FiUnlock className="inline mr-2" />Unblock</> : <><FiLock className="inline mr-2" />Block</>}</button>
+                            <button onClick={() => { setResetPasswordModal(user); setActiveUserMenu(null); }} className="w-full text-left block px-4 py-2 text-sm text-white hover:bg-gray-800">Reset Password</button>
+                            <button onClick={() => { handleViewHistory(user); setActiveUserMenu(null); }} className="w-full text-left block px-4 py-2 text-sm text-white hover:bg-gray-800"><FiEye className="inline mr-2" />View History</button>
+                            <button onClick={() => handleDeleteUser(user._id)} className="w-full text-left block px-4 py-2 text-sm text-red-500 hover:bg-gray-800"><FiTrash2 className="inline mr-2" />Delete</button>
+                          </div>
+                        )}
+                      </div>
                     </td>
                   </tr>
                 ))}
@@ -175,7 +182,7 @@ const AdminDashboard = () => {
       )}
 
       {view === 'history' && (
-        <div className="bg-[#111] p-4 rounded-lg shadow-lg overflow-x-auto">
+         <div className="bg-[#111] p-4 rounded-lg shadow-lg overflow-x-auto">
           <table className="w-full text-left">
             <thead>
               <tr className="border-b border-gray-700">
@@ -197,7 +204,6 @@ const AdminDashboard = () => {
         </div>
       )}
 
-      {/* Reset Password Modal */}
       {resetPasswordModal && (
         <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-20">
           <div className="bg-[#111] p-6 rounded-lg shadow-lg w-full max-w-md">
@@ -213,7 +219,6 @@ const AdminDashboard = () => {
         </div>
       )}
 
-      {/* View History Modal */}
       {viewHistoryModal && (
         <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-20">
           <div className="bg-[#111] p-6 rounded-lg shadow-lg w-full max-w-2xl">

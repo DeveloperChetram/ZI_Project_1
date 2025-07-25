@@ -6,19 +6,21 @@ import Register from '../pages/Register';
 import AdminDashboard from '../components/AdminDashboard';
 import Dashboard from '../pages/Dashboard';
 import ProfilePage from '../pages/ProfilePage';
+import BlockedPage from '../pages/BlockedPage'; // Import the new BlockedPage
 
 const PrivateRoute = ({ children }) => {
-  // We only need the token to decide if the route is accessible.
-  const { token } = useSelector((state) => state.auth);
-
-  // Use token from Redux state or local storage as the definitive check
+  const { token, user } = useSelector((state) => state.auth);
   const hasToken = token || localStorage.getItem('token');
 
-  if (hasToken) {
-    return children;
+  if (!hasToken) {
+    return <Navigate to="/login" replace />;
   }
 
-  return <Navigate to="/login" replace />;
+  if (user && user.isBlocked) {
+    return <Navigate to="/blocked" replace />;
+  }
+
+  return children;
 };
 
 const MainRoutes = () => {
@@ -28,6 +30,7 @@ const MainRoutes = () => {
       <Route path='/home' element={<Home />} />
       <Route path='/login' element={<Login />} />
       <Route path='/sign-up' element={<Register />} />
+      <Route path='/blocked' element={<BlockedPage />} />
       
       {/* --- Protected Routes --- */}
       <Route path="/dashboard" element={<PrivateRoute><Dashboard /></PrivateRoute>} />
