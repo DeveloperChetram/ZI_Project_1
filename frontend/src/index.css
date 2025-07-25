@@ -1,1 +1,18 @@
 @import "tailwindcss";
+/* Custom Toastify styling */
+.Toastify__toast-theme--dark {
+  background: #1b2d1b !important; /* dark green background */
+  color: #d3d3d3 !important; /* light gray text */
+}
+
+.Toastify__toast-theme--dark .Toastify__progress-bar {
+  background: #3fa34d !important; /* green progress bar */
+}
+
+.Toastify__toast-theme--dark .Toastify__close-button {
+  color: #9e9e9e !important; /* gray close button */
+}
+
+.Toastify__toast-icon {
+  color: #76c893 !important; /* mint green icon */
+}
