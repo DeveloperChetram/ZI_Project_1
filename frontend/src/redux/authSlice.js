@@ -1,6 +1,19 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import * as api from '../api/api';
 
+// This thunk fetches the token and user data from the API
+export const loginUser = createAsyncThunk('auth/loginUser', async (credentials, { rejectWithValue }) => {
+  try {
+    const response = await api.login(credentials);
+    // On success, the API returns { token, user }
+    localStorage.setItem('token', response.data.token);
+    return response.data; // This will contain both token and user
+  } catch (error) {
+    return rejectWithValue(error.response.data.error || 'Login failed');
+  }
+});
+
+// Other thunks remain the same...
 export const registerUser = createAsyncThunk('auth/registerUser', async (userData, { rejectWithValue }) => {
   try {
     const response = await api.signup(userData);
@@ -11,21 +24,12 @@ export const registerUser = createAsyncThunk('auth/registerUser', async (userDat
   }
 });
 
-export const loginUser = createAsyncThunk('auth/loginUser', async (credentials, { rejectWithValue }) => {
-  try {
-    const response = await api.login(credentials);
-    localStorage.setItem('token', response.data.token);
-    return response.data;
-  } catch (error) {
-    return rejectWithValue(error.response.data.error);
-  }
-});
 
 const initialState = {
   user: null,
   token: localStorage.getItem('token') || null,
   isAuthenticated: !!localStorage.getItem('token'),
-  status: 'idle',
+  status: 'idle', // 'idle' | 'loading' | 'succeeded' | 'failed'
   error: null,
 };
 
@@ -35,7 +39,7 @@ const authSlice = createSlice({
   reducers: {
     setUser: (state, action) => {
       state.user = action.payload;
-      state.isAuthenticated = true;
+      state.isAuthenticated = true; // Also ensure isAuthenticated is true
     },
     logout: (state) => {
       localStorage.removeItem('token');
@@ -48,19 +52,22 @@ const authSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
-      .addCase(registerUser.fulfilled, (state, action) => {
-        state.status = 'succeeded';
-        state.user = action.payload.user;
-        state.token = action.payload.token;
-        state.isAuthenticated = true;
-        state.error = null; // Clear error on success
-      })
+      // Handle the successful login action
       .addCase(loginUser.fulfilled, (state, action) => {
         state.status = 'succeeded';
-        state.user = action.payload.user;
         state.token = action.payload.token;
+        // THIS IS THE FIX:
+        // The user object is nested inside the payload.
+        state.user = action.payload.user;
         state.isAuthenticated = true;
-        state.error = null; // Clear error on success
+        state.error = null;
+      })
+      .addCase(registerUser.fulfilled, (state, action) => {
+        state.status = 'succeeded';
+        state.token = action.payload.token;
+        state.user = action.payload.user;
+        state.isAuthenticated = true;
+        state.error = null;
       })
       .addMatcher((action) => action.type.endsWith('/pending'), (state) => {
         state.status = 'loading';
@@ -68,7 +75,10 @@ const authSlice = createSlice({
       })
       .addMatcher((action) => action.type.endsWith('/rejected'), (state, action) => {
         state.status = 'failed';
-        state.error = action.payload; // Set the error from the backend
+        state.error = action.payload;
+        state.isAuthenticated = false; // Ensure this is false on failure
+        state.token = null;
+        state.user = null;
       });
   },
 });

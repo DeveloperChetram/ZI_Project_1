@@ -5,11 +5,20 @@ import Login from '../pages/Login';
 import Register from '../pages/Register';
 import AdminDashboard from '../components/AdminDashboard';
 import Dashboard from '../pages/Dashboard';
-import ProfilePage from '../pages/ProfilePage'; // This path must match the file location
+import ProfilePage from '../pages/ProfilePage';
 
 const PrivateRoute = ({ children }) => {
-  const { isAuthenticated } = useSelector((state) => state.auth);
-  return isAuthenticated ? children : <Navigate to="/login" />;
+  // We only need the token to decide if the route is accessible.
+  const { token } = useSelector((state) => state.auth);
+
+  // Use token from Redux state or local storage as the definitive check
+  const hasToken = token || localStorage.getItem('token');
+
+  if (hasToken) {
+    return children;
+  }
+
+  return <Navigate to="/login" replace />;
 };
 
 const MainRoutes = () => {
@@ -19,21 +28,11 @@ const MainRoutes = () => {
       <Route path='/home' element={<Home />} />
       <Route path='/login' element={<Login />} />
       <Route path='/sign-up' element={<Register />} />
-
-      {/* --- Private Routes --- */}
-      {/* Wrap protected routes in the PrivateRoute component */}
-      <Route
-        path="/dashboard"
-        element={<PrivateRoute><Dashboard /></PrivateRoute>}
-      />
-      <Route
-        path="/admin-dashboard"
-        element={<PrivateRoute><AdminDashboard /></PrivateRoute>}
-      />
-      <Route
-        path="/profile"
-        element={<PrivateRoute><ProfilePage /></PrivateRoute>}
-      />
+      
+      {/* --- Protected Routes --- */}
+      <Route path="/dashboard" element={<PrivateRoute><Dashboard /></PrivateRoute>} />
+      <Route path="/admin-dashboard" element={<PrivateRoute><AdminDashboard /></PrivateRoute>} />
+      <Route path="/profile" element={<PrivateRoute><ProfilePage /></PrivateRoute>} />
     </Routes>
   );
 };

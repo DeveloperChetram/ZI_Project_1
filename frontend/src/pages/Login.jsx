@@ -2,7 +2,7 @@ import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { Link, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
-import { loginUser } from '../redux/authSlice'; // Ensure this is the correct import
+import { loginUser } from '../redux/authSlice';
 import { toast } from 'react-toastify';
 
 const Login = () => {
@@ -10,27 +10,22 @@ const Login = () => {
     const dispatch = useDispatch();
     const navigate = useNavigate();
     
-    // Select all necessary state pieces from the Redux store
-    const { isAuthenticated, status, error } = useSelector((state) => state.auth);
+    const { isAuthenticated, status, error, user } = useSelector((state) => state.auth);
 
     const loginHandler = (data) => {
-        // Dispatch the login action
         dispatch(loginUser(data));
     };
 
-    // This useEffect hook will now correctly handle the entire login flow
+    // This effect handles navigation AFTER the user object is successfully loaded
     useEffect(() => {
-        // 1. If login is successful (isAuthenticated becomes true)
-        if (isAuthenticated) {
+        if (isAuthenticated && user) {
             toast.success("Login Successful!");
-            navigate("/dashboard"); // 2. Redirect the user to the dashboard
+            navigate("/dashboard");
         }
-
-        // 3. If login fails, show an error message
         if (status === 'failed' && error) {
             toast.error(error);
         }
-    }, [isAuthenticated, status, error, navigate]); // Dependencies array is crucial
+    }, [isAuthenticated, user, status, error, navigate]);
 
     return (
         <section className="min-h-screen w-full flex items-center justify-center bg-black px-4">
