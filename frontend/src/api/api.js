@@ -29,4 +29,9 @@ export const getHistory = () => api.get('/file/history');
 // Chart endpoints
 export const getChartData = () => api.get('/chart/data');
 
+// Admin endpoints
+export const getAdminStats = () => api.get('/admin/stats');
+export const getAllUsers = () => api.get('/admin/users');
+export const deleteUserById = (id) => api.delete(`/admin/users/${id}`);
+
 export default api;

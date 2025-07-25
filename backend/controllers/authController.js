@@ -8,7 +8,7 @@ const generateToken = (userId) => {
 
 const signup = async (req, res) => {
   try {
-    const { username, email, password } = req.body;
+    const { username, email, password, role } = req.body; // Add role
 
     // Check if user already exists
     const existingUser = await User.findOne({ 
@@ -25,7 +25,8 @@ const signup = async (req, res) => {
     const user = new User({
       username,
       email,
-      password
+      password,
+      role: role || 'user' // Default to 'user' if not provided
     });
 
     await user.save();
