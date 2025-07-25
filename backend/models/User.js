@@ -27,7 +27,7 @@ const userSchema = new mongoose.Schema({
   },
   isBlocked: {
     type: Boolean,
-    default: false
+    default: false // This line is crucial
   },
   createdAt: {
     type: Date,
@@ -53,6 +53,4 @@ userSchema.methods.comparePassword = async function(candidatePassword) {
   return bcrypt.compare(candidatePassword, this.password);
 };
 
-// THIS IS THE FIX:
-// Check if the model already exists before trying to create it.
 module.exports = mongoose.models.User || mongoose.model('User', userSchema);

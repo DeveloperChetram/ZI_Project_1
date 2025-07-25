@@ -1,4 +1,4 @@
-const User = require('../User');
+const User = require('../models/User'); // CORRECTED PATH
 const jwt = require('jsonwebtoken');
 
 // Generate JWT token
@@ -24,7 +24,8 @@ const signup = async (req, res) => {
       username,
       email,
       password,
-      role: role || 'user'
+      role: role || 'user',
+      isBlocked: false // Explicitly set isBlocked on creation
     });
 
     await user.save();
@@ -37,7 +38,8 @@ const signup = async (req, res) => {
         id: user._id,
         username: user.username,
         email: user.email,
-        role: user.role
+        role: user.role,
+        isBlocked: user.isBlocked
       }
     });
 
@@ -53,13 +55,16 @@ const login = async (req, res) => {
 
     const user = await User.findOne({ email });
     if (!user) {
-      // Provide a specific error message
       return res.status(401).json({ error: 'No user found with this email' });
+    }
+
+    // Check if the user is blocked before allowing login
+    if (user.isBlocked) {
+        return res.status(403).json({ error: 'Your account has been blocked by an administrator.' });
     }
 
     const isPasswordValid = await user.comparePassword(password);
     if (!isPasswordValid) {
-      // Provide a specific error message
       return res.status(401).json({ error: 'Incorrect password' });
     }
 
@@ -72,7 +77,8 @@ const login = async (req, res) => {
         id: user._id,
         username: user.username,
         email: user.email,
-        role: user.role
+        role: user.role,
+        isBlocked: user.isBlocked
       }
     });
 
