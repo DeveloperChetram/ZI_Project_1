@@ -1,4 +1,4 @@
-const User = require('../User');
+const User = require('../models/User');
 const Upload = require('../models/Upload');
 
 // Get statistics for the admin dashboard
@@ -6,22 +6,8 @@ exports.getStats = async (req, res) => {
   try {
     const totalUsers = await User.countDocuments();
     const totalUploads = await Upload.countDocuments();
-
-    // Example of a more complex aggregation
-    const mostUsedChartTypes = await Upload.aggregate([
-      { $group: { _id: '$chartType', count: { $sum: 1 } } }, // Assuming you add chartType to Upload model
-      { $sort: { count: -1 } },
-      { $limit: 5 }
-    ]);
-    
-    res.status(200).json({
-      totalUsers,
-      totalUploads,
-      mostUsedChartTypes
-    });
-
+    res.status(200).json({ totalUsers, totalUploads });
   } catch (error) {
-    console.error(error);
     res.status(500).json({ error: 'Failed to fetch stats' });
   }
 };
@@ -32,23 +18,52 @@ exports.getUsers = async (req, res) => {
     const users = await User.find().select('-password');
     res.status(200).json(users);
   } catch (error) {
-    console.error(error);
     res.status(500).json({ error: 'Failed to fetch users' });
+  }
+};
+
+// Add a new user (admin only)
+exports.addUser = async (req, res) => {
+  try {
+    const { username, email, password, role } = req.body;
+    const newUser = new User({ username, email, password, role });
+    await newUser.save();
+    res.status(201).json({ message: 'User created successfully' });
+  } catch (error) {
+    res.status(400).json({ error: 'Failed to create user' });
+  }
+};
+
+// Block/Unblock a user
+exports.toggleBlockUser = async (req, res) => {
+  try {
+    const user = await User.findById(req.params.id);
+    if (!user) return res.status(404).json({ error: 'User not found' });
+    user.isBlocked = !user.isBlocked;
+    await user.save();
+    res.status(200).json({ message: `User has been ${user.isBlocked ? 'blocked' : 'unblocked'}` });
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to update user status' });
   }
 };
 
 // Delete a user
 exports.deleteUser = async (req, res) => {
   try {
-    const user = await User.findByIdAndDelete(req.params.id);
-    if (!user) {
-      return res.status(404).json({ error: 'User not found' });
-    }
-    // Also delete their uploads
+    await User.findByIdAndDelete(req.params.id);
     await Upload.deleteMany({ user: req.params.id });
-    res.status(200).json({ message: 'User and their data deleted successfully' });
+    res.status(200).json({ message: 'User and their uploads deleted' });
   } catch (error) {
-    console.error(error);
     res.status(500).json({ error: 'Failed to delete user' });
+  }
+};
+
+// Get all uploads from all users
+exports.getAllUploads = async (req, res) => {
+  try {
+    const uploads = await Upload.find().populate('user', 'username email').sort({ uploadedAt: -1 });
+    res.status(200).json(uploads);
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to fetch uploads' });
   }
 };

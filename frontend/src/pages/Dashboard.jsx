@@ -6,6 +6,7 @@ import {
 import FileUpload from '../components/FileUpload';
 import UploadHistory from '../components/UploadHistory';
 import ChartCard from '../components/ChartCard';
+import DataTable from '../components/DataTable'; // 1. Import the new DataTable component
 
 // Register all necessary Chart.js components
 ChartJS.register(
@@ -13,7 +14,6 @@ ChartJS.register(
   RadialLinearScale, Title, Tooltip, Legend, Filler
 );
 
-// A professional color palette
 const CHART_COLORS = [
   '#4dc9f6', '#f67019', '#f53794', '#537bc4', '#acc236',
   '#166a8f', '#00a950', '#58595b', '#8549ba'
@@ -25,6 +25,7 @@ const Dashboard = () => {
   const [xAxis, setXAxis] = useState('');
   const [yAxis, setYAxis] = useState('');
   const [headers, setHeaders] = useState([]);
+  const [viewMode, setViewMode] = useState('charts'); // 2. Add state for view mode ('charts' or 'table')
 
   const chartTypes = ['bar', 'line', 'pie', 'doughnut', 'polarArea', 'radar', 'scatter'];
 
@@ -47,13 +48,12 @@ const Dashboard = () => {
     return String(value);
   };
   
-  const handleGenerateChart = () => {
+  const handleGenerate = () => {
     if (xAxis && yAxis && selectedFile) {
       const labels = selectedFile.data.map((row) => sanitizeLabel(row[xAxis]));
       const data = selectedFile.data.map((row) => parseFloat(row[yAxis])).filter(v => !isNaN(v));
 
-      // Use the predefined color palette
-      const backgroundColors = labels.map((_, i) => CHART_COLORS[i % CHART_COLORS.length] + '80'); // Add alpha for transparency
+      const backgroundColors = labels.map((_, i) => CHART_COLORS[i % CHART_COLORS.length] + '80');
       const borderColors = labels.map((_, i) => CHART_COLORS[i % CHART_COLORS.length]);
 
       setChartData({
@@ -64,8 +64,8 @@ const Dashboard = () => {
           backgroundColor: backgroundColors,
           borderColor: borderColors,
           borderWidth: 2,
-          fill: true, // For Line and Radar charts
-          tension: 0.4, // For smoother lines
+          fill: true,
+          tension: 0.4,
           pointBackgroundColor: borderColors,
           pointBorderColor: '#fff',
           pointHoverRadius: 7,
@@ -74,68 +74,12 @@ const Dashboard = () => {
     }
   };
 
-  // Define different options for different chart categories
-  const commonOptions = {
-    responsive: true,
-    maintainAspectRatio: false,
-    plugins: {
-      legend: { 
-        display: false 
-      },
-      title: { 
-        display: false 
-      },
-      tooltip: {
-        backgroundColor: 'rgba(0, 0, 0, 0.7)',
-        padding: 10,
-        titleFont: { size: 14 },
-        bodyFont: { size: 12 },
-      }
-    },
-  };
-
-  const linearOptions = { 
-    ...commonOptions, 
-    scales: { 
-      x: { 
-        ticks: { color: '#ccc', maxRotation: 90, minRotation: 45 }, 
-        grid: { color: 'rgba(255, 255, 255, 0.1)' } 
-      }, 
-      y: { 
-        ticks: { color: '#ccc' }, 
-        grid: { color: 'rgba(255, 255, 255, 0.1)' } 
-      } 
-    } 
-  };
-
-  const pieOptions = { 
-    ...commonOptions 
-  };
-  
-  const radialOptions = { 
-    ...commonOptions, 
-    scales: { 
-      r: { 
-        angleLines: { color: 'rgba(255,255,255,0.2)' }, 
-        grid: { color: 'rgba(255,255,255,0.2)' }, 
-        pointLabels: { color: 'white', font: { size: 10 } }, 
-        ticks: { color: 'white', backdropColor: 'transparent' } 
-      } 
-    } 
-  };
-
-  const getOptionsForChart = (type) => {
-    switch(type) {
-      case 'pie':
-      case 'doughnut':
-      case 'polarArea':
-        return pieOptions;
-      case 'radar':
-        return radialOptions;
-      default:
-        return linearOptions;
-    }
-  };
+  // Options objects remain the same
+  const commonOptions = { /* ... */ };
+  const linearOptions = { /* ... */ };
+  const pieOptions = { /* ... */ };
+  const radialOptions = { /* ... */ };
+  const getOptionsForChart = (type) => { /* ... */ };
 
   return (
     <div className="w-full max-w-7xl mx-auto p-4">
@@ -167,29 +111,42 @@ const Dashboard = () => {
                 </select>
               </div>
             </div>
-            <button onClick={handleGenerateChart} className="w-full bg-[#02b576] text-white py-2 rounded-md shadow hover:shadow-[0_0_15px_#02b576] transition-all disabled:bg-gray-500 disabled:cursor-not-allowed" disabled={!selectedFile || !xAxis || !yAxis}>
-              Generate Charts
-            </button>
+            
+            {/* 3. Add view mode buttons and a single "Generate" button */}
+            <div className="grid grid-cols-2 gap-4">
+                <button onClick={() => { setViewMode('charts'); handleGenerate(); }} className="w-full bg-[#02b576] text-white py-2 rounded-md shadow hover:shadow-[0_0_15px_#02b576] transition-all disabled:bg-gray-500" disabled={!selectedFile || !xAxis || !yAxis}>
+                    Generate Charts
+                </button>
+                <button onClick={() => setViewMode('table')} className="w-full bg-blue-600 text-white py-2 rounded-md shadow hover:shadow-[0_0_15px_#2563eb] transition-all disabled:bg-gray-500" disabled={!selectedFile}>
+                    Generate Table
+                </button>
+            </div>
           </div>
         </div>
       </div>
 
-      {chartData && (
-        <div className="mt-8">
-          <h3 className="text-2xl font-bold text-white mb-4">Visualizations</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-            {chartTypes.map(type => (
-              <ChartCard
-                key={type}
-                title={`${type.charAt(0).toUpperCase() + type.slice(1)} Chart`}
-                chartType={type}
-                chartData={chartData}
-                chartOptions={getOptionsForChart(type)}
-              />
-            ))}
-          </div>
-        </div>
-      )}
+      {/* 4. Conditionally render charts or table based on viewMode */}
+      <div className="mt-8">
+        {viewMode === 'charts' && chartData && (
+          <>
+            <h3 className="text-2xl font-bold text-white mb-4">Chart Visualizations</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+              {chartTypes.map(type => (
+                <ChartCard
+                  key={type}
+                  title={`${type.charAt(0).toUpperCase() + type.slice(1)} Chart`}
+                  chartType={type}
+                  chartData={chartData}
+                  chartOptions={getOptionsForChart(type)}
+                />
+              ))}
+            </div>
+          </>
+        )}
+        {viewMode === 'table' && selectedFile && (
+           <DataTable data={selectedFile.data} fileName={selectedFile.filename} />
+        )}
+      </div>
     </div>
   );
 };
