@@ -1,12 +1,12 @@
 const User = require('../models/User');
-const bcrypt = require('bcryptjs');
 
 // @desc    Get user profile
 // @route   GET /api/users/profile
 // @access  Private
 const getUserProfile = async (req, res) => {
-  // req.user is attached by the auth middleware
+  // The 'auth' middleware attaches the user object to the request (req.user)
   const user = await User.findById(req.user._id).select('-password');
+  
   if (user) {
     res.json(user);
   } else {

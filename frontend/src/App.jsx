@@ -12,24 +12,21 @@ const App = () => {
   const { token } = useSelector((state) => state.auth);
 
   useEffect(() => {
-    // This effect runs when the app loads
+    // This effect runs once on app load to verify the token
     const fetchUserProfile = async () => {
       if (token) {
         try {
-          // If there is a token, try to fetch the user profile
           const res = await getUserProfile();
-          // If successful, update the user in the Redux store
-          dispatch(setUser(res.data));
+          dispatch(setUser(res.data)); // Load user data into Redux
         } catch (error) {
-          // If the token is invalid or expired, log the user out
-          console.error("Failed to fetch user profile, logging out.", error);
-          dispatch(logout());
+          console.error("Token is invalid or expired. Logging out.", error);
+          dispatch(logout()); // Clear invalid token
         }
       }
     };
 
     fetchUserProfile();
-  }, [token, dispatch]);
+  }, [dispatch, token]); // Depends on token to re-run if it changes
 
   return (
     <div className="min-h-screen bg-black flex flex-col items-center w-full">
@@ -37,14 +34,7 @@ const App = () => {
       <MainRoutes />
       <ToastContainer
         position="top-right"
-        autoClose={5000}
-        hideProgressBar={false}
-        newestOnTop={false}
-        closeOnClick
-        rtl={false}
-        pauseOnFocusLoss
-        draggable
-        pauseOnHover
+        autoClose={3000}
         theme="dark"
       />
     </div>
