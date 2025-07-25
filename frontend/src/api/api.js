@@ -32,6 +32,8 @@ export const getAllUsers = () => api.get('/admin/users');
 export const addUser = (userData) => api.post('/admin/users', userData);
 export const toggleBlockUser = (id) => api.patch(`/admin/users/${id}/toggle-block`);
 export const deleteUserById = (id) => api.delete(`/admin/users/${id}`);
+export const resetUserPassword = (id, password) => api.post(`/admin/users/${id}/reset-password`, { password });
+export const getUserUploads = (id) => api.get(`/admin/users/${id}/uploads`);
 export const getAllUploads = () => api.get('/admin/uploads');
 
 // User Profile endpoints

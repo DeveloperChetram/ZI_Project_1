@@ -26,6 +26,7 @@ const Navbar = () => {
           {user?.role === 'admin' && (
             <NavLink className={({ isActive }) => isActive ? activeLinkClass : inactiveLinkClass} to='/admin-dashboard'>Admin</NavLink>
           )}
+           <NavLink className={({ isActive }) => isActive ? activeLinkClass : inactiveLinkClass} to='/profile'>Profile</NavLink>
           <button onClick={handleLogout} className={inactiveLinkClass}>Logout</button>
         </>
       ) : (
