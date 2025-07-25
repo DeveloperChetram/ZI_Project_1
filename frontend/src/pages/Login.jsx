@@ -23,7 +23,11 @@ const Login = () => {
             navigate("/dashboard");
         }
         if (status === 'failed' && error) {
-            toast.error(error);
+            if (error === 'Your account has been blocked by an administrator.') {
+                navigate('/blocked');
+            } else {
+                toast.error(error);
+            }
         }
     }, [isAuthenticated, user, status, error, navigate]);
 
