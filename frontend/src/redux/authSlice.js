@@ -7,7 +7,7 @@ export const registerUser = createAsyncThunk('auth/registerUser', async (userDat
     localStorage.setItem('token', response.data.token);
     return response.data;
   } catch (error) {
-    return rejectWithValue(error.response.data);
+    return rejectWithValue(error.response.data.error);
   }
 });
 
@@ -17,7 +17,7 @@ export const loginUser = createAsyncThunk('auth/loginUser', async (credentials, 
     localStorage.setItem('token', response.data.token);
     return response.data;
   } catch (error) {
-    return rejectWithValue(error.response.data);
+    return rejectWithValue(error.response.data.error);
   }
 });
 
@@ -25,7 +25,7 @@ const initialState = {
   user: null,
   token: localStorage.getItem('token') || null,
   isAuthenticated: !!localStorage.getItem('token'),
-  status: 'idle', // 'idle' | 'loading' | 'succeeded' | 'failed'
+  status: 'idle',
   error: null,
 };
 
@@ -35,10 +35,10 @@ const authSlice = createSlice({
   reducers: {
     setUser: (state, action) => {
       state.user = action.payload;
+      state.isAuthenticated = true;
     },
     logout: (state) => {
       localStorage.removeItem('token');
-      // Reset all fields to their default values
       state.user = null;
       state.token = null;
       state.isAuthenticated = false;
@@ -53,29 +53,23 @@ const authSlice = createSlice({
         state.user = action.payload.user;
         state.token = action.payload.token;
         state.isAuthenticated = true;
-        state.error = null;
+        state.error = null; // Clear error on success
       })
       .addCase(loginUser.fulfilled, (state, action) => {
         state.status = 'succeeded';
         state.user = action.payload.user;
         state.token = action.payload.token;
         state.isAuthenticated = true;
+        state.error = null; // Clear error on success
+      })
+      .addMatcher((action) => action.type.endsWith('/pending'), (state) => {
+        state.status = 'loading';
         state.error = null;
       })
-      .addMatcher(
-        (action) => action.type.endsWith('/pending'),
-        (state) => {
-          state.status = 'loading';
-          state.error = null;
-        }
-      )
-      .addMatcher(
-        (action) => action.type.endsWith('/rejected'),
-        (state, action) => {
-          state.status = 'failed';
-          state.error = action.payload.error;
-        }
-      );
+      .addMatcher((action) => action.type.endsWith('/rejected'), (state, action) => {
+        state.status = 'failed';
+        state.error = action.payload; // Set the error from the backend
+      });
   },
 });
 

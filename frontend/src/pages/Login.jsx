@@ -2,28 +2,35 @@ import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { Link, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
-import { loginUser } from '../redux/authSlice'; // CORRECT: Import from authSlice
+import { loginUser } from '../redux/authSlice'; // Ensure this is the correct import
 import { toast } from 'react-toastify';
 
 const Login = () => {
     const { register, handleSubmit } = useForm();
     const dispatch = useDispatch();
     const navigate = useNavigate();
+    
+    // Select all necessary state pieces from the Redux store
     const { isAuthenticated, status, error } = useSelector((state) => state.auth);
 
     const loginHandler = (data) => {
-        dispatch(loginUser(data)); // CORRECT: Dispatch loginUser
+        // Dispatch the login action
+        dispatch(loginUser(data));
     };
 
+    // This useEffect hook will now correctly handle the entire login flow
     useEffect(() => {
+        // 1. If login is successful (isAuthenticated becomes true)
         if (isAuthenticated) {
             toast.success("Login Successful!");
-            navigate("/dashboard");
+            navigate("/dashboard"); // 2. Redirect the user to the dashboard
         }
+
+        // 3. If login fails, show an error message
         if (status === 'failed' && error) {
             toast.error(error);
         }
-    }, [isAuthenticated, status, error, navigate]);
+    }, [isAuthenticated, status, error, navigate]); // Dependencies array is crucial
 
     return (
         <section className="min-h-screen w-full flex items-center justify-center bg-black px-4">
@@ -37,6 +44,7 @@ const Login = () => {
                             type="email"
                             placeholder="you@example.com"
                             className="w-full px-4 py-2 rounded-md bg-black border border-gray-700 text-white focus:outline-none focus:ring-2 focus:ring-[#02b576]"
+                            required
                         />
                     </div>
                     <div className="mb-6">
@@ -46,6 +54,7 @@ const Login = () => {
                             type="password"
                             placeholder="••••••••"
                             className="w-full px-4 py-2 rounded-md bg-black border border-gray-700 text-white focus:outline-none focus:ring-2 focus:ring-[#02b576]"
+                            required
                         />
                     </div>
                     <button
