@@ -6,6 +6,7 @@ const dotenv = require("dotenv");
 const authRoutes = require("./routes/authRoutes");
 const fileRoutes = require("./routes/fileRoutes");
 const chartRoutes = require('./routes/chartRoutes');
+const adminRoutes = require('./routes/adminRoutes'); // Import admin routes
 
 dotenv.config();
 
@@ -20,6 +21,7 @@ app.use(express.json());
 app.use("/api/auth", authRoutes);
 app.use("/api/file", fileRoutes);
 app.use('/api/chart', chartRoutes);
+app.use('/api/admin', adminRoutes); // Use admin routes
 
 // MongoDB Connection
 mongoose.connect(process.env.MONGO_URI, {
@@ -33,6 +35,7 @@ mongoose.connect(process.env.MONGO_URI, {
     );
   })
   .catch((err) => console.error("❌ MongoDB connection error:", err));
+  
 app.get("/", (req, res) => {
   res.send("✅ Backend is running!");
 });

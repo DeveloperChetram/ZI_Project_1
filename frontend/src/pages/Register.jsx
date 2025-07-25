@@ -52,6 +52,17 @@ const Registration = () => {
                             className="w-full px-4 py-2 rounded-md bg-black border border-gray-700 text-white focus:outline-none focus:ring-2 focus:ring-[#02b576]"
                         />
                     </div>
+                    {/* Add Role Selection Dropdown */}
+                    <div className="mb-6">
+                        <label className="block mb-2 text-sm text-gray-400">Role</label>
+                        <select
+                            {...register("role")}
+                            className="w-full px-4 py-2 rounded-md bg-black border border-gray-700 text-white focus:outline-none focus:ring-2 focus:ring-[#02b576]"
+                        >
+                            <option value="user">User</option>
+                            <option value="admin">Admin</option>
+                        </select>
+                    </div>
                     <button
                         type="submit"
                         className="cursor-pointer w-full bg-[#02b576] text-white py-2 rounded-md shadow hover:shadow-[0_0_15px_#02b576] transition-all"

@@ -29,13 +29,16 @@ const parseExcel = async (filePath) => {
   return rows;
 };
 
+// Associate file with the logged-in user
 exports.uploadFile = async (req, res) => {
   try {
     const data = await parseExcel(req.file.path);
+    
+    // req.user is added by the 'auth' middleware
     await Upload.create({
       filename: req.file.originalname,
       data,
-      uploadedAt: new Date()
+      user: req.user._id // Link to the user
     });
 
     fs.unlinkSync(req.file.path); // Clean up uploaded file
@@ -46,13 +49,13 @@ exports.uploadFile = async (req, res) => {
   }
 };
 
+// Fetch history only for the logged-in user
 exports.getHistory = async (req, res) => {
   try {
-    const history = await Upload.find().sort({ uploadedAt: -1 });
+    const history = await Upload.find({ user: req.user._id }).sort({ uploadedAt: -1 });
     res.status(200).json(history);
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'Failed to fetch history' });
   }
 };
-
