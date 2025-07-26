@@ -22,7 +22,7 @@ const BlockedPage = () => {
           Your account has been suspended by an administrator.
         </p>
         <p className="text-sm text-gray-400 mt-2">
-          Please contact admin for more information.
+          Please contact support for more information.
         </p>
 
         <div className="mt-6 flex justify-center gap-4">

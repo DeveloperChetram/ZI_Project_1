@@ -18,12 +18,23 @@ const Login = () => {
 
     useEffect(() => {
         if (isAuthenticated && user) {
-            toast.success("Login Successful!");
-            navigate("/dashboard");
+            // If login is successful but user is blocked, redirect
+            if (user.isBlocked) {
+                navigate('/blocked');
+            } else {
+                toast.success("Login Successful!");
+                navigate("/dashboard");
+            }
         }
         if (status === 'failed' && error) {
-            // Display a generic server error if a specific one isn't provided
-            toast.error(error || 'A server error occurred. Please try again.');
+            // Check for the specific blocked error message from your backend
+            if (error === 'Your account has been blocked by an administrator.') {
+                navigate('/blocked');
+            } else {
+                toast.error(error || 'A server error occurred. Please try again.');
+                
+
+            }
         }
     }, [isAuthenticated, user, status, error, navigate]);
 
