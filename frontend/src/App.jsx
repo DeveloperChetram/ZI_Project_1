@@ -16,43 +16,32 @@ const App = () => {
   const showNavbar = location.pathname !== '/blocked';
 
   useEffect(() => {
-    // This effect runs once on app load to verify the token
     const fetchUserProfile = async () => {
       if (token) {
         try {
           const res = await getUserProfile();
-          dispatch(setUser(res.data)); // Load user data into Redux
+          dispatch(setUser(res.data));
         } catch (error) {
           console.error("Token is invalid or expired. Logging out.", error);
           if (error.response?.data?.error === 'Your account has been blocked by an administrator.') {
             // Don't logout, so the blocked state is preserved
           } else {
-            dispatch(logout()); // Clear invalid token
+            dispatch(logout());
           }
         }
       }
     };
 
     fetchUserProfile();
-  }, [dispatch, token]); // Depends on token to re-run if it changes
+  }, [dispatch, token]);
 
   return (
     <div className="min-h-screen bg-black flex flex-col items-center w-full">
       {showNavbar && <Navbar />}
       <MainRoutes />
-     <ToastContainer
-  position="top-center"
-  autoClose={3000}
-  hideProgressBar={false}
-  newestOnTop={false}
-  closeOnClick
-  rtl={false}
-  pauseOnFocusLoss
-  draggable
-  pauseOnHover
-  theme="dark"
-/>
-
+      <ToastContainer
+        // ...
+      />
     </div>
   );
 };

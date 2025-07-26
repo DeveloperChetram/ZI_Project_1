@@ -19,6 +19,7 @@ const Registration = () => {
         if (isAuthenticated) {
             toast.success("Registration Successful!");
             navigate("/dashboard");
+            
         }
         if (status === 'failed' && error) {
             toast.error(error || 'A server error occurred. Please try again.');
@@ -31,7 +32,7 @@ const Registration = () => {
                 <h2 className="text-2xl font-semibold mb-6 text-center text-white">Create an Account</h2>
                 <form onSubmit={handleSubmit(registerHandler)}>
                     <div className="mb-4">
-                        <label className="block mb-2 text-sm text-gray-400">Full Name</label>
+                        <label className="block mb-2 text-sm text-gray-400">Username</label>
                         <input
                             {...register("username")}
                             type="text"
