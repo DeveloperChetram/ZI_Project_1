@@ -16,18 +16,14 @@ const Login = () => {
         dispatch(loginUser(data));
     };
 
-    // This effect handles navigation AFTER the user object is successfully loaded
     useEffect(() => {
         if (isAuthenticated && user) {
             toast.success("Login Successful!");
             navigate("/dashboard");
         }
         if (status === 'failed' && error) {
-            if (error === 'Your account has been blocked by an administrator.') {
-                navigate('/blocked');
-            } else {
-                toast.error(error);
-            }
+            // Display a generic server error if a specific one isn't provided
+            toast.error(error || 'A server error occurred. Please try again.');
         }
     }, [isAuthenticated, user, status, error, navigate]);
 
@@ -58,7 +54,7 @@ const Login = () => {
                     </div>
                     <button
                         type="submit"
-                        className="cursor-pointer w-full bg-[#02b576] text-white py-2 rounded-md shadow hover:shadow-[0_0_15px_#02b576] transition-all"
+                        className="cursor-pointer w-full bg-[#02b576] text-white py-2 rounded-md shadow hover:shadow-[0_0_15px_#02b576] transition-all disabled:bg-gray-500 disabled:cursor-not-allowed"
                         disabled={status === 'loading'}
                     >
                         {status === 'loading' ? 'Logging In...' : 'Login'}
