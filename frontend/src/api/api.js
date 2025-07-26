@@ -1,11 +1,13 @@
 import axios from 'axios';
 
-const API_URL = 'https://zi-project-1-2.onrender.com/api';
+// Use the environment variable for the API URL, with a fallback for local development
+const API_URL = import.meta.env.VITE_API_URL ;
 
 const api = axios.create({
   baseURL: API_URL,
 });
 
+// Interceptor to add the JWT token to every request
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem('token');
   if (token) {
@@ -14,11 +16,11 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
-// Authentication endpoints
+// --- Authentication endpoints ---
 export const signup = (userData) => api.post('/auth/signup', userData);
 export const login = (credentials) => api.post('/auth/login', credentials);
 
-// File endpoints
+// --- File endpoints ---
 export const uploadFile = (formData) => api.post('/file/upload', formData, {
   headers: {
     'Content-Type': 'multipart/form-data',
@@ -26,7 +28,7 @@ export const uploadFile = (formData) => api.post('/file/upload', formData, {
 });
 export const getHistory = () => api.get('/file/history');
 
-// Admin endpoints
+// --- Admin endpoints ---
 export const getAdminStats = () => api.get('/admin/stats');
 export const getAllUsers = () => api.get('/admin/users');
 export const addUser = (userData) => api.post('/admin/users', userData);
@@ -36,7 +38,7 @@ export const resetUserPassword = (id, password) => api.post(`/admin/users/${id}/
 export const getUserUploads = (id) => api.get(`/admin/users/${id}/uploads`);
 export const getAllUploads = () => api.get('/admin/uploads');
 
-// User Profile endpoints
+// --- User Profile endpoints ---
 export const getUserProfile = () => api.get('/users/profile');
 export const updateUserProfile = (userData) => api.put('/users/profile', userData);
 export const changePassword = (passwordData) => api.put('/users/change-password', passwordData);
